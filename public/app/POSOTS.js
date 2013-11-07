@@ -7,7 +7,7 @@ var POS = {
 			}
 		}		
 		new MCOR.Model('Order', {"pk":'_id',"dbTable":"order","database":"posots","structure":OrderStructure,"conType":"RAPI", "databaseLabel":"POSOTS"});
-		
+				
 		var ItemStructure = {
 			fields: {
 				id: {"label":"Id", "column":"_id"},
@@ -15,13 +15,47 @@ var POS = {
 			}
 		}		
 		new MCOR.Model('Item', {"pk":'_id',"dbTable":"item","database":"posots","structure":ItemStructure,"conType":"RAPI", "databaseLabel":"POSOTS"});
+		
+		POS.MVC = {
+			Order: {
+				views: new POS.View({name:'Order Views'}),
+				model: MCOR.Models.Order,
+				controller: new POS.Controller({name:'Order Controller'})
+			},
+			Item: {
+				views: new POS.View({name:'Item Views'}),
+				model: MCOR.Models.Item,
+				controller: new POS.Controller({name:'Item Controller'})
+			}
+		}
+		
+		//TODO this is only a test
+		POS.MVC.Item.views.create_view('add', 
+			$nE('div',{'id':"newItem"}, 
+				$nE('form',{"id":"newItemForm"},[
+					$nE('div', {"id":"newNameContainer"}, [
+						$nE('label', {"for":"newNameField"}, $cTN('Name')),
+						$nE('input', {"id":"newNameField", "class":"input", "name":"name"})
+					])
+				])
+			)
+		);
+		
+		$aC(document.body, [POS.MVC.Item.views.views.add]);
+		
+		
+		
 	},
 	
-	POS.Items.list.init();
+	
+	
+	//POS.Items.list.init();
 	
 }
 
-POS.init();
+document.addEventListener('DOMContentLoaded', function() {
+	POS.init();
+})
 
 
 /*
