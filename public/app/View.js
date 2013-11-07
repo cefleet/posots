@@ -1,0 +1,3 @@
+POS.View = MCOR.Class({
+	
+});

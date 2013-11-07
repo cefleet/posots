@@ -1,0 +1,21 @@
+a {
+	cursor:pointer;
+}
+
+#woiListtBody tr {
+	cursor:pointer;
+}
+#woiListtBody tr:hover {
+	background:#f4f4f4;
+}
+
+.nav-list {
+	border:1px solid #ddd;
+	border-radius: 4px;
+	margin:10px 0;
+}
+
+.nav-list li a{
+	padding: 8px 14px;
+	border: 1px solid #e5e5e5;
+}
