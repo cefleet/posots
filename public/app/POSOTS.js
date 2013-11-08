@@ -45,7 +45,68 @@ document.addEventListener('DOMContentLoaded', function() {
 	POS.init();
 })
 
+//Sample item
 
+/*
+ * "item": {
+       "name": "White Chocolate Mocha",
+       "price": 6.25,
+       "options": {
+           "decaf": {
+               "name": "decaf",
+               "label": "Decaf",
+               "price": 0
+           },
+           "lofat": {
+               "name": "lofat",
+               "label": "Lofat",
+               "price": 0
+           },
+           "whipped_cream": {
+               "name": "whipped_cream",
+               "label": "Whipped Cream",
+               "price": 0.5
+           }
+       }
+   }
+ */
+
+//Sample order
+
+/*
+ * "order": {
+       "order_number": 1,
+       "name": "Clint Fleetwood",
+       "placed_time": "07-11-2013 10:52",
+       "order_items": [
+           {
+               "item_id": "0618f78e1c4bf127b3506ab0120030f7",
+               "item_name": "White Chocolate Mocha",
+               "item_price": 6.25,
+               "modifiers": [
+                   {
+                       "modifier_name": "decaf",
+                       "modifier_price": 0
+                   },
+                   {
+                       "modifier_name": "lofat",
+                       "modifier_price": 0
+                   }
+               ]
+           },
+           {
+               "item_id": "0618f78e1c4bf127b3506ab0120030f7",
+               "item_name": "White Chocolate Mocha",
+               "item_price": 6.25,
+               "modifiers": [
+               ]
+           }
+       ],
+       "pre_tax": 12.5,
+       "tax": 2.5,
+       "total": 15
+   }
+ */
 
 //TODO add a polling number to the node backend to get order number
 /*
