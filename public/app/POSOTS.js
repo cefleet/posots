@@ -1,95 +1,54 @@
 var POS = {
+	MVCElements : ['Order','Item'],
 	init: function(){
-		var OrderStructure = {
-			fields: {
-				id: {"label":"Id", "column":"_id"},
-				order:{"column":"order"}
+		
+		POS.constants = {
+			lists:{
+				options: {
+					lofat: {
+						name:'lofat',
+						label:'Low Fat',
+						suggested_price:0
+					},
+					decaf: {
+						name:'decaf',
+						label:'Decaffinated',
+						suggested_price:0
+					},
+					whipped_cream: {
+						name:'whipped_cream',
+						label:'Whipped Cream',
+						suggested_price:.50
+					}
+				}
 			}
-		}		
-		new MCOR.Model('Order', {"pk":'_id',"dbTable":"order","database":"posots","structure":OrderStructure,"conType":"RAPI", "databaseLabel":"POSOTS"});
-				
-		var ItemStructure = {
-			fields: {
-				id: {"label":"Id", "column":"_id"},
-				item:{"column":"item"}
-			}
-		}		
-		new MCOR.Model('Item', {"pk":'_id',"dbTable":"item","database":"posots","structure":ItemStructure,"conType":"RAPI", "databaseLabel":"POSOTS"});
+		};
 		
-		POS.MVC = {
-			Order: {
-				views: new POS.View({name:'Order Views'}),
-				model: MCOR.Models.Order,
-				controller: new POS.Controller({name:'Order Controller'})
-			},
-			Item: {
-				views: new POS.View({name:'Item Views'}),
-				model: MCOR.Models.Item,
-				controller: new POS.Controller({name:'Item Controller'})
-			}
-		}
-		
-		//TODO this is only a test
-		POS.MVC.Item.views.create_view('add', 
-			$nE('div',{'id':"newItem"}, 
-				$nE('form',{"id":"newItemForm"},[
-					$nE('div', {"id":"newNameContainer"}, [
-						$nE('label', {"for":"newNameField"}, $cTN('Name')),
-						$nE('input', {"id":"newNameField", "class":"input", "name":"name"})
-					])
-				])
-			)
-		);
-		
-		$aC(document.body, [POS.MVC.Item.views.views.add]);
-		
-		
-		
-	},
-	
-	
-	
-	//POS.Items.list.init();
-	
+		//This kicks it off
+		POS.Order.Controller.load_add();	
+	}			
+};
+
+//Loads the needed files for the MVC elements
+document.write("<script src='app/Controller.js'></script>");
+document.write("<script src='app/View.js'></script>");
+
+for (var i=0, len=POS.MVCElements.length; i<len; i++) {
+	document.write("<script src='app/" + POS.MVCElements[i] + "/model.js'></script>");
+	document.write("<script src='app/" + POS.MVCElements[i] + "/controller.js'></script>");
+	document.write("<script src='app/" + POS.MVCElements[i] + "/view.js'></script>");
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+	//TODO add scripts here
+	
 	POS.init();
 })
 
 
-/*
-//TODO this is just a test
-MCOR.Models.Item.create_item(
-	{item:{
-		name : 'White Chocolate Mocha',
-		price : 6.25,
-		options: {
-			decaf : {
-				name:'decaf',
-				label:'Decaf',
-				price:0
-			},
-			lofat: {
-				name:'lofat',
-				label:'Lofat',
-				price:0
-			},
-			whipped_cream: {
-				name:'whipped_cream',
-				label:'Whipped Cream',
-				price:.50
-			}
-		}
-	}},
-	function(data){
-		console.log(data);
-	}
-);
-
 
 //TODO add a polling number to the node backend to get order number
-
+/*
 
 MCOR.Models.Item.get_list(null,function(data){
 	var item = MCOR.Models.Item.store.content[0];
