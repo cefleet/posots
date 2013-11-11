@@ -101,7 +101,7 @@ POS.Item.Controller = new POS.Controller({
 		
 		var list = function(data){
 			//Format the list
-			callback(results);
+			callback(data);
 		};
 		this.get_all(list);
 		

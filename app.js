@@ -1,7 +1,6 @@
 //loads express
 global.config = require('./config');
 
-console.log(config);
 var express = require('express');
 
 //These 2 are just for the user creation

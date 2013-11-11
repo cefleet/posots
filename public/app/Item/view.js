@@ -78,7 +78,6 @@ POS.Item.View = new POS.View({
 		var content = [];
 		
 		for(var o in options){
-			console.log(options[o]);
 			content.push($nE('option', {"value":options[o].name}, $cTN(options[o].label)))
 		}
 	

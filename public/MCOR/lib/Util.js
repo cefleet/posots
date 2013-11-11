@@ -113,3 +113,9 @@ hasClass = function(el, cssClass) {
 function toObj(obj, str) {
     return str.split(".").reduce(function(o, x) { return o[x] }, obj);
 }
+
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}

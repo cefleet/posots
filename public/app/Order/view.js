@@ -27,8 +27,44 @@ POS.Order.View = new POS.View({
 	},
 	
 	_item : function(){
-		var content = $nE('li',null,$cTN('Item Added'));
+		var id = $uid();
+		var content = $nE('li',{"id":id},[
+			$nE('div', {"class":"ItemContainer"},[
+				$nE('label', null, $cTN('Item')),
+				$nE('select', {"name":"item", id:'dropdown_'+id})
+			])	
+		]);		
+		return content;
+	},
+	
+	_item_list : function(){
+		var listItems = this.controller.itemsListForView;
+		var content = [];
+		listItems.forEach(function(item){
+			content.push($nE('option', {"value":item.id}, $cTN(item.label)))
+		});
 		
+		return content;
+	},
+	
+	_item_details : function(){
+		var content = $nE('div', {"class":"itemContent"},[
+
+			$nE('div', {"id":"newPriceContainer"}, [
+				$nE('label', {"for":"newPriceField"}, $cTN('Price')),
+				$nE('input', {"class":"input", "name":"price"})
+			]),
+			$nE('div', {"id":"ItemOptions"}, [
+				$nE('ul', {"id":"ItemOptionsList"})
+			])
+		]);
+		return content;
+	},
+	
+	_item_option : function(){
+		var content = $nE('div', {"class":"itemOptionCheckbox"}, 
+			$nE('input', {"type":"checkbox","class":"checkbox"}, $nE('label'))
+		);
 		return content;
 	}
 });	
