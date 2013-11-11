@@ -8,19 +8,50 @@ POS.Order.View = new POS.View({
 	 */
 	
 	add : function(){
-		var content = $nE('div', {"id":"newOrder"},[
-			$nE('div', {"id":"newOrderNumberContainer"}, [
-				$nE('label', {"for":"newOrderNumber"}, $cTN('Order Number')),
-				$nE('input', {"id":"newOrderNumber", "class":"input", "name":"order_number", "disabled":"disabled"})
+		var content = $nE('div', null, [ 
+			$nE('div', {"id":"newOrder", "class":"span6"},[
+				$nE('input', {"id":"newOrderNumber", "type":"hidden","name":"order_number"}),
+				$nE('div', {"id":"newNameContainer"}, [
+					$nE('label', {"for":"newNameField"}, $cTN('Customer Name')),
+					$nE('input', {"id":"newNameField", "class":"input", "name":"name", "type":"text"})
+				]),
+				$nE('div', {"id":"OrderItemsContainer"}, [
+					$nE('ul', {"id":"OrderItemsList", "class":"unstyled"}),
+					$nE('button', {'id':"newOrderItemButton","class":"btn btn-primary"},$cTN('Add Item'))
+				])
 			]),
-			$nE('div', {"id":"newNameContainer"}, [
-				$nE('label', {"for":"newNameField"}, $cTN('Name')),
-				$nE('input', {"id":"newNameField", "class":"input", "name":"name"})
-			]),
-			$nE('div', {"id":"OrderItemsContainer"}, [
-				$nE('ul', {"id":"OrderItemsList"}),
-				$nE('button', {'id':"newOrderItemButton","class":"btn btn-primary"},$cTN('Add Item'))
+			$nE('div', {"id":"reviewView", "class":"span5 well well-small"},[
+				$nE('div', {"id":"orderNumber"}, [
+					$nE('span', {}, $cTN('Order # : ')),
+					$nE('strong', {"id":"DisplayOrderNumber"})
+				]),
+				$nE('div', {"id":"customerName"}, [
+					$nE('span', {}, $cTN('Customer : ')),
+					$nE('strong', {"id":"DisplayCustomer"})
+				]),
+				$nE('ul', {"id":"reviewItemList", "class":"unstyled"})
 			])
+		]);		
+		return content;
+	},
+	
+	_review_item : function(id){
+		var content = $nE('li',{"id":'review_'+id, "class":"clearfix"},[
+			$nE('div', {"class":"reviewItemContainer"},[
+				$nE('div', {"class":"baseItem  clearfix"}, [
+					$nE('span', {"class":"baseItemName pull-left"}),
+					$nE('span', {"class":"baseItemPrice pull-right"})					
+				]),
+				$nE('ul', {"class":"reviewItemOptions"})
+			]),
+		]);		
+		return content;
+	},
+	
+	_review_item_option : function(id){
+		var content = $nE('li',{"id":"reviewOption_"+id},[
+			$nE('span', {"class":"optionItemName"}),
+			$nE('span', {"class":"optionItemPrice pull-right"})
 		]);
 		
 		return content;
@@ -28,11 +59,11 @@ POS.Order.View = new POS.View({
 	
 	_item : function(){
 		var id = $uid();
-		var content = $nE('li',{"id":id},[
+		var content = $nE('li',{"id":id, "class":"well well-small"},[
 			$nE('div', {"class":"ItemContainer"},[
-				$nE('label', null, $cTN('Item')),
-				$nE('select', {"name":"item", id:'dropdown_'+id})
-			])	
+				$nE('select', {"name":"item", id:'dropdown_'+id}),
+				$nE('button',{"class":"btn btn-danger pull-right"}, $cTN('X'))	
+			]),
 		]);		
 		return content;
 	},
@@ -50,20 +81,22 @@ POS.Order.View = new POS.View({
 	_item_details : function(){
 		var content = $nE('div', {"class":"itemContent"},[
 
-			$nE('div', {"id":"newPriceContainer"}, [
-				$nE('label', {"for":"newPriceField"}, $cTN('Price')),
-				$nE('input', {"class":"input", "name":"price"})
+			$nE('div', {"id":"newPriceContainer", "class":"input-prepend"}, [
+				$nE('span', {"class":"add-on"}, $cTN('$')),
+				$nE('input', {"class":"input span1", "name":"price", "type":"text"})
 			]),
 			$nE('div', {"id":"ItemOptions"}, [
-				$nE('ul', {"id":"ItemOptionsList"})
+				$nE('ul', {"id":"ItemOptionsList", "class":"unstyled inline"})
 			])
 		]);
 		return content;
 	},
 	
 	_item_option : function(){
-		var content = $nE('div', {"class":"itemOptionCheckbox"}, 
-			$nE('input', {"type":"checkbox","class":"checkbox"}, $nE('label'))
+		var content = $nE('li', {"class":"itemOptionCheckbox", "style":"padding: 0 16px 0"},[ 
+				$nE('input', {"type":"checkbox","class":"checkbox"}),
+				$nE('label', {"class":"label"})
+			]
 		);
 		return content;
 	}
