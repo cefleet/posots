@@ -52,7 +52,10 @@ POS.Order.Controller = new POS.Controller({
 	
 	_submit_order : function(){
 		//TODO get all of the values for each item on the left side. to make the order and put it into a JSON array.
-		console.log(this.orderDetails);
+		this.orderDetails.status = 'pending';
+		var dateObj = new Date();
+		//this.orderDetails.placed = dateObj.getFullYear()+'-'+Number(dateObj.getMonth()+1)+'-'+dateObj.getDate()+' '+dateObj.getHours()+':'+dateObj.getMinutes()+':'+dateObj.getSeconds()+'.'+dateObj.getMilliseconds(); 
+		this.orderDetails.placed = dateObj.toString();
 		this.save_item(this.orderDetails, function(){
 			//todo send ot printer. .. hehee
 			this.load_add();
