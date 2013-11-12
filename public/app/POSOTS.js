@@ -21,6 +21,9 @@ var POS = {
 						suggested_price:.50
 					}
 				}
+			},
+			taxes: {
+				percent:7
 			}
 		};
 		

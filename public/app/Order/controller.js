@@ -6,8 +6,10 @@ POS.Order.Controller = new POS.Controller({
  * load_add
  */
 	load_add : function(){
-		document.body.innerHTML = '';
 
+		document.body.innerHTML = '';
+		this.orderDetails = {order_items:{}};
+		
 		this.load_view(this.view.add(),document.body);
 		
 		var addItem = $g('newOrderItemButton');
@@ -21,22 +23,50 @@ POS.Order.Controller = new POS.Controller({
 			var display = $g('DisplayOrderNumber');
 			//INNER HTML ok for just a non html item ie text
 			display.innerHTML = orderNumber;
+			this.orderDetails.order_number = orderNumber;
 			
 			var custName = $g('newNameField');
 			var custDisplay = $g('DisplayCustomer');
 			
+			this.orderDetails.name = custName.value;
+			
 			custName.addEventListener('keyup', function(){
-				custDisplay.innerHTML = custName.value;	
-			});
-		});		
+				custDisplay.innerHTML = custName.value;
+				this.orderDetails.name = custName.value;
+			}.bind(this));
+		}.bind(this));
+		
+		this.reviewContent = $g('reviewView').innerHTML;
+		//setinterval..yeah
+		var checkChanges = setInterval(function(){
+			var reviewContent = $g('reviewView').innerHTML;
+			if(this.reviewContent != reviewContent){
+				this.update_totals();
+				this.reviewContent = reviewContent
+			}
+		}.bind(this), 200);
+		
+		var submitButton = $g('submitOrder');
+		submitButton.addEventListener('click', this._submit_order.bind(this));		
+	},
+	
+	_submit_order : function(){
+		//TODO get all of the values for each item on the left side. to make the order and put it into a JSON array.
+		console.log(this.orderDetails);
+		this.save_item(this.orderDetails, function(){
+			//todo send ot printer. .. hehee
+			this.load_add();
+		}.bind(this));		
 	},
 	
 	_load_item : function(){
 		var itemLi = this.view._item();
 		this.load_view(itemLi, $g('OrderItemsList'));
-		
+			
 		var reviewItemLi = this.view._review_item(itemLi.id);
 		this.load_view(reviewItemLi, $g('reviewItemList'));
+		
+		this.orderDetails.order_items[itemLi.id] = {};
 		
 		var dropdown = itemLi.childNodes[0].childNodes[0];
 
@@ -61,12 +91,15 @@ POS.Order.Controller = new POS.Controller({
 		}.bind(this));
 		
 		var deleteButton = 	itemLi.childNodes[0].childNodes[1];
-		deleteButton.addEventListener('click', function(){
-			var reviewId = $g('review_'+this.parentNode.parentNode.id);
-			this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);
-			reviewId.parentNode.removeChild(reviewId);
-			//TODO recalculate total
-		});
+		deleteButton.addEventListener('click', function(e){
+			var reviewItem = $g('review_'+e.target.parentNode.parentNode.id);
+
+			delete this.orderDetails.order_items[e.target.parentNode.parentNode.id];
+
+			e.target.parentNode.parentNode.parentNode.removeChild(e.target.parentNode.parentNode);
+			reviewItem.parentNode.removeChild(reviewItem);
+
+		}.bind(this));
 		
 	},
 	
@@ -105,6 +138,11 @@ POS.Order.Controller = new POS.Controller({
 		this.load_view(itemDetails, container);
 		
 		var item = this.itemsList[itemId];
+		var containerId = itemDetails.parentNode.id;
+		this.orderDetails.order_items[containerId].item_id = itemId;
+		this.orderDetails.order_items[containerId].item_price = item.price;
+		this.orderDetails.order_items[containerId].item_name = item.name;
+	
 		reviewName.innerHTML = item.name;		
 	
 		var priceInput = itemDetails.childNodes[0].childNodes[1];				
@@ -113,7 +151,9 @@ POS.Order.Controller = new POS.Controller({
 		
 		priceInput.addEventListener('blur', function(){
 			reviewPrice.innerHTML = priceInput.value;
-		});
+			console.log(containerId);
+			this.orderDetails.order_items[containerId].item_price = priceInput.value;
+		}.bind(this));
 				
 		for(var option in item.options){
 			//TODO a function is needed here
@@ -127,7 +167,7 @@ POS.Order.Controller = new POS.Controller({
 		this.load_view(itemOption, container.childNodes[1].childNodes[1].childNodes[0]);
 		itemOption.childNodes[0].value = item.name;
 		itemOption.childNodes[0].id = rand;
-					
+						
 		$aC(itemOption.childNodes[1], [$cTN(item.label+' - $'+item.price)]);
 
 		itemOption.childNodes[1].setAttribute('for', rand);			
@@ -137,11 +177,21 @@ POS.Order.Controller = new POS.Controller({
 			var checkBoxId = e.target.id;
 			var optionType = e.target.value;
 			var container = $g('review_'+rootId).childNodes[0].childNodes[1];
+			
 			if(e.target.checked){
 				var optionView = this.view._review_item_option(checkBoxId);
 				this.load_view(optionView, container);
 				var name = optionView.childNodes[0];
 				var price = optionView.childNodes[1];
+				
+				if(!this.orderDetails.order_items[rootId].modifiers){
+					this.orderDetails.order_items[rootId].modifiers = {};
+				}
+				
+				this.orderDetails.order_items[rootId].modifiers[item.name] = {
+					modifier_label:item.label,
+					modifier_price: item.price
+				}			
 				
 				name.innerHTML = item.label;
 				price.innerHTML = item.price;
@@ -149,8 +199,32 @@ POS.Order.Controller = new POS.Controller({
 			} else {
 				var optionItem = $g('reviewOption_'+e.target.id);
 				optionItem.parentNode.removeChild(optionItem);
+				if(this.orderDetails.order_items[rootId].modifiers[item.name]){
+					delete this.orderDetails.order_items[rootId].modifiers[item.name];
+				}
 			}
+			
 		}.bind(this));
+	},
+	
+	update_totals: function(){
+		var priceElements = $gCN(['priceItemForTotal'], $g('reviewView'));
+		var total = 0;
+		priceElements.forEach(function(elem){
+			total = total+Number(elem.innerHTML);
+		});
+		
+		this.orderDetails.subtotal = Number(total).formatMoney('2','.',',');
+		this.orderDetails.taxrate = POS.constants.taxes.percent;
+		this.orderDetails.salestax = Number((this.orderDetails.subtotal*Number(POS.constants.taxes.percent/100))).formatMoney('2','.',',');
+		this.orderDetails.grandtotal = Number(Number(this.orderDetails.salestax)+Number(this.orderDetails.subtotal)).formatMoney('2','.',',');
+		
+		//TODO not loving this. Too much visulazations for a controller.. but meh
+		//TODO make this a view for my sainity if you get a chance
+		$g('totalsTotal').innerHTML = 'Subtotal : $'+this.orderDetails.subtotal;
+		$g('totalsTaxPer').innerHTML = 'Tax Rate: '+this.orderDetails.taxrate+'%';
+		$g('totalsTax').innerHTML = 'Sales Tax : $'+this.orderDetails.salestax;
+		$g('totalsGrandTotal').innerHTML = 'Grand Total : $'+this.orderDetails.grandtotal;
 	},
 	
 	next_order : function(callback){

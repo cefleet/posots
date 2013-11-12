@@ -9,7 +9,7 @@ POS.Order.View = new POS.View({
 	
 	add : function(){
 		var content = $nE('div', null, [ 
-			$nE('div', {"id":"newOrder", "class":"span6"},[
+			$nE('div', {"id":"newOrder", "class":"span5"},[
 				$nE('input', {"id":"newOrderNumber", "type":"hidden","name":"order_number"}),
 				$nE('div', {"id":"newNameContainer"}, [
 					$nE('label', {"for":"newNameField"}, $cTN('Customer Name')),
@@ -20,16 +20,27 @@ POS.Order.View = new POS.View({
 					$nE('button', {'id':"newOrderItemButton","class":"btn btn-primary"},$cTN('Add Item'))
 				])
 			]),
-			$nE('div', {"id":"reviewView", "class":"span5 well well-small"},[
-				$nE('div', {"id":"orderNumber"}, [
-					$nE('span', {}, $cTN('Order # : ')),
-					$nE('strong', {"id":"DisplayOrderNumber"})
+			$nE('div', {"id":"reviewPanel", "class":"span5"},[
+				$nE('div', {"id":"reviewView", "class":"well well-small"},[
+					$nE('div', {"id":"orderNumber"}, [
+						$nE('span', {}, $cTN('Order # : ')),
+						$nE('strong', {"id":"DisplayOrderNumber"})
+					]),
+					$nE('div', {"id":"customerName"}, [
+						$nE('span', {}, $cTN('Customer : ')),
+						$nE('strong', {"id":"DisplayCustomer"})
+					]),
+					$nE('ul', {"id":"reviewItemList", "class":"unstyled"}),
+					$nE('div', {"id":"totalsBox", "style":"border-top:1px dashed"}, [
+						$nE('div',{"class":"text-right", "id":"totalsTotal"}),
+						$nE('div',{"class":"text-right", "id":"totalsTaxPer"}),
+						$nE('div',{"class":"text-right", "id":"totalsTax"}),
+						$nE('div',{"class":"text-right", "id":"totalsGrandTotal", "style":"border-top:1px solid"})
+					])
 				]),
-				$nE('div', {"id":"customerName"}, [
-					$nE('span', {}, $cTN('Customer : ')),
-					$nE('strong', {"id":"DisplayCustomer"})
-				]),
-				$nE('ul', {"id":"reviewItemList", "class":"unstyled"})
+				$nE('div', {}, 
+					$nE('button', {"class":"btn btn-primary", "id":"submitOrder"},$cTN('Submit Order'))
+				)
 			])
 		]);		
 		return content;
@@ -40,7 +51,7 @@ POS.Order.View = new POS.View({
 			$nE('div', {"class":"reviewItemContainer"},[
 				$nE('div', {"class":"baseItem  clearfix"}, [
 					$nE('span', {"class":"baseItemName pull-left"}),
-					$nE('span', {"class":"baseItemPrice pull-right"})					
+					$nE('span', {"class":"baseItemPrice pull-right priceItemForTotal"})					
 				]),
 				$nE('ul', {"class":"reviewItemOptions"})
 			]),
@@ -51,7 +62,7 @@ POS.Order.View = new POS.View({
 	_review_item_option : function(id){
 		var content = $nE('li',{"id":"reviewOption_"+id},[
 			$nE('span', {"class":"optionItemName"}),
-			$nE('span', {"class":"optionItemPrice pull-right"})
+			$nE('span', {"class":"optionItemPrice pull-right priceItemForTotal"})
 		]);
 		
 		return content;
