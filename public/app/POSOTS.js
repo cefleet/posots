@@ -19,7 +19,12 @@ var POS = {
 						name:'whipped_cream',
 						label:'Whipped Cream',
 						suggested_price:.50
-					}
+					},
+					soy: {
+						name:'soy',
+						label:'Soy',
+						suggested_price:0
+					},
 				}
 			},
 			taxes: {
@@ -68,9 +73,14 @@ document.addEventListener('DOMContentLoaded', function() {
            "whipped_cream": {
                "name": "whipped_cream",
                "label": "Whipped Cream",
-               "price": 0.5
+               "price": 0.50
            }
-       }
+       },
+	"soy":{
+		"name":"soy",
+		"label":Soy",
+		"price":"0"
+	}
    }
  */
 

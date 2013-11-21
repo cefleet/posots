@@ -39,24 +39,157 @@ POS.Order.Controller = new POS.Controller({
 		this.reviewContent = $g('reviewView').innerHTML;
 		//setinterval..yeah
 		var checkChanges = setInterval(function(){
-			var reviewContent = $g('reviewView').innerHTML;
-			if(this.reviewContent != reviewContent){
-				this.update_totals();
-				this.reviewContent = reviewContent
-			}
+		    if(!$g('reviewView')){
+		        clearInterval(checkChanges);   
+		    } else {
+		        var reviewContent = $g('reviewView').innerHTML;
+			
+			    if(this.reviewContent != reviewContent){
+				    this.update_totals();
+				    this.reviewContent = reviewContent;
+			    }
+		    }
 		}.bind(this), 200);
+		
+		var manageItems = $g('manageItems');
+		manageItems.addEventListener('click', POS.Item.Controller.load_list.bind(POS.Item.Controller));
 		
 		var submitButton = $g('submitOrder');
 		submitButton.addEventListener('click', this._submit_order.bind(this));		
+		
+		var viewOrders = $g('viewOrders');
+		viewOrders.addEventListener('click', this.load_list.bind(this));
 	},
 	
+	load_list : function(){
+	    document.body.innerHTML = '';
+	    this.load_view(this.view.list(),document.body);
+	    
+	    this.pending_list();
+	    this.paid_list();
+	    this.started_list();
+	    this.completed_list();
+	    
+	},
+	
+	_put_into_list : function(content, container){
+	    var li = this.view._load_list_item(content.id);
+	    $aC(container, [li]);
+	    li.childNodes[0].innerHTML = content.order.order_number;
+	    li.childNodes[1].innerHTML = ' - '+content.order.name;
+	    li.childNodes[2].innerHTML = content.order.grandtotal;
+	    li.data = content;
+	    li.addEventListener('click',this._order_items_clicked.bind(this), true)
+	},
+	
+	_order_items_clicked : function(e){
+	    //TODO this is kinda ghetto 
+	    var target = e.target;
+	    if(e.target.tagName != 'LI'){
+	        target = e.target.parentNode;
+	    }
+	    
+	    var data = target.data;
+	    console.log(data);
+        var id = target.id.replace('order_','');
+        
+        var modal = this.view._launch_item_modal();
+        
+        modal.childNodes[0].childNodes[0].innerHTML = data.order.order_number+' - '+data.order.name;
+        modal.childNodes[1].innerHTML = 'Order Details';
+       
+        modal.data = data;
+        var btnLabel = 'Paid';
+        var newStatus = 'paid';
+        if(data.order.status === 'paid'){
+            newStatus = 'started';
+            btnLabel = 'Started'
+        } else if(data.order.status === 'started'){
+            newStatus = 'complete',
+            btnLabel = 'Complete'
+        } else if(data.order.status === 'complete'){
+           modal.childNodes[2].childNodes[0].style.visibility = 'hidden'; 
+        }
+        modal.childNodes[2].childNodes[0].id = newStatus;
+        modal.childNodes[2].childNodes[0].innerHTML = btnLabel;
+        
+        modal.childNodes[2].childNodes[0].addEventListener('click', function(e){
+            console.log(e);
+            this.change_status_of_item(e.target.id);
+        }.bind(this));
+        
+        modal.childNodes[2].childNodes[1].addEventListener('click',function(){
+             $('#orderModal').modal('hide'); 
+        });
+        
+        $aC(document.body, [modal]);
+
+        $('#orderModal').modal('show');
+        $('#orderModal').on('hidden', function(){
+            var elem = $g('orderModal')
+            elem.parentNode.removeChild(elem); 
+         });
+	},
+	
+	change_status_of_item : function(newStatus){
+	    console.log('The Status is about to be changed to '+newStatus+'!');
+	    var modal = $g('orderModal');
+	    modal.data.order.status = newStatus;
+	    console.log(modal.data.order.id);
+	    //set the data
+	    this.update_item(modal.data._id, modal.data, function(d){
+	        console.log(d);
+	    });
+	    //save to database
+	    
+	    //TODO if time // Send to socket IO for updating
+	    
+	    //close the modal
+	    $('#orderModal').modal('hide');
+	},
+	
+	pending_list: function(){
+	    this.get_all(function(data){
+	        var pendingList = $g('pendingList');
+	        data.forEach(function(item){
+	            this._put_into_list(item.content, pendingList);
+	        }.bind(this));
+	    }.bind(this), {view:'get_all_pending'});
+	},
+	
+	paid_list : function(){
+	   this.get_all(function(data){
+	        var paidList = $g('paidList');
+	        data.forEach(function(item){
+	            this._put_into_list(item.content, paidList)
+	        }.bind(this));
+	    }.bind(this),{view:'get_all_paid'}); 
+	},
+    
+    started_list : function(){
+        this.get_all(function(data){
+	        var startedList = $g('startedList');
+	        data.forEach(function(item){
+	            this._put_into_list(item.content, startedList)
+	        }.bind(this));
+	    }.bind(this),{view:'get_all_started'});
+    },
+    
+    completed_list : function(){
+        this.get_all(function(data){
+	        var completedList = $g('completedList');
+	        data.forEach(function(item){
+	            this._put_into_list(item.content, completedList)
+	        }.bind(this));
+	    }.bind(this),{view:'get_all_completed'});
+    },
 	_submit_order : function(){
 		//TODO get all of the values for each item on the left side. to make the order and put it into a JSON array.
 		this.orderDetails.status = 'pending';
 		var dateObj = new Date();
 		//this.orderDetails.placed = dateObj.getFullYear()+'-'+Number(dateObj.getMonth()+1)+'-'+dateObj.getDate()+' '+dateObj.getHours()+':'+dateObj.getMinutes()+':'+dateObj.getSeconds()+'.'+dateObj.getMilliseconds(); 
 		this.orderDetails.placed = dateObj.toString();
-		this.save_item(this.orderDetails, function(){
+		this.save_item({order:this.orderDetails}, function(){
 			//todo send ot printer. .. hehee
 			this.load_add();
 		}.bind(this));		

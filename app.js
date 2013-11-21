@@ -19,5 +19,4 @@ app.all('/api/:action/:table', function(req,res, next){
 	mcorRest.request(req,res, function(){});		
 });
 
-
-app.listen(2102);
+app.listen(process.env.PORT);

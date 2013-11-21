@@ -8,7 +8,9 @@ POS.Order.View = new POS.View({
 	 */
 	
 	add : function(){
-		var content = $nE('div', null, [ 
+		var content = $nE('div', null, [
+		    $nE('button', {"id":"manageItems", "class":"btn btn-primary"},$cTN('Manage Menu')),
+		    $nE('button', {"id":"viewOrders", "class":"btn btn-primary"},$cTN('Orders View')),
 			$nE('div', {"id":"newOrder", "class":"span5"},[
 				$nE('input', {"id":"newOrderNumber", "type":"hidden","name":"order_number"}),
 				$nE('div', {"id":"newNameContainer"}, [
@@ -46,6 +48,63 @@ POS.Order.View = new POS.View({
 		return content;
 	},
 	
+	list: function(){
+	    var content = $nE('div',{}, [
+	        $nE('div', {"id":"pendingPanel", "class":"span4"}, [
+	            $nE('h3', {}, $cTN('Pending Orders')),
+	            $nE('ul', {"id":"pendingList", "class":"unstyled orderList"})
+	        ]),
+	         $nE('div', {"id":"paidPanel",  "class":"span4"}, [
+	            $nE('h3', {}, $cTN('Paid Orders')),
+	            $nE('ul', {"id":"paidList", "class":"unstyled orderList"})  
+	        ]),
+	         $nE('div', {"id":"startedPanel",  "class":"span4"}, [
+	            $nE('h3', {}, $cTN('Started Orders')),
+	            $nE('ul', {"id":"startedList", "class":"unstyled orderList"})  
+	        ]),
+	        //TODO make this one toggalbe
+	         $nE('div', {"id":"completedPanel", "class":"clearfix span12"}, [
+	            $nE('h3', {}, $cTN('Completed Orders')),
+	            $nE('ul', {"id":"completedList", "class":"unstyled orderList span4"})  
+	        ])
+	    ]);
+	    
+	    return content;
+	},
+	
+	_load_list_item : function(id){
+	    var content = $nE('li', {"id":"order_"+id,"class":"pull-left", "style":"width:100%"},[
+	        $nE('span', {"class":"orderNumber pull-left"}),
+	        $nE('span', {"class":"orderName pull-left"}),
+	        $nE('span', {"class":"orderCost pull-right"})
+	   ]);
+	   return content;
+	},
+	
+	_launch_item_modal : function(){
+	    var content = $nE('div', {
+	        "id":"orderModal", 
+	        "class":"modal hide fade", 
+	        "tabindex":"-1", 
+	        "role":"dialog",
+	        "aria-labelledby":"orderModalLabel",
+	        "aria-hidden":"true"
+	        },
+	        [
+	            $nE('div',{"class":"modal-header", "id":"orderNumber"}, [
+	                $nE('h3')    
+	            ]),
+	            $nE('div', {"class":"modal-body", "id":"orderContent"},[
+	                
+	            ]), 
+	            $nE('div',{"class":"modal-footer", "id":"orderFooter"},[
+	               $nE('button', {"class":"btn btn-large btn-primary"}),
+	               $nE('button', {"class":"btn","id":"closeModal"}, $cTN('Close'))
+	            ])
+	        ])
+	   return content;
+	},
+	
 	_review_item : function(id){
 		var content = $nE('li',{"id":'review_'+id, "class":"clearfix"},[
 			$nE('div', {"class":"reviewItemContainer"},[
@@ -54,7 +113,7 @@ POS.Order.View = new POS.View({
 					$nE('span', {"class":"baseItemPrice pull-right priceItemForTotal"})					
 				]),
 				$nE('ul', {"class":"reviewItemOptions"})
-			]),
+			])
 		]);		
 		return content;
 	},

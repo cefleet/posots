@@ -198,11 +198,15 @@ MCOR.Model.prototype = {
 		} else if(this.conType == 'RAPI'){
 		
 			//RESTAPI
-			var queryString = '';
-			for(option in queryOptions){
+			var queryString = '?randId='+$uid();
+			
+			/*for(option in queryOptions){
 				queryString += '&conditions='.concat(option).concat(':'.concat(queryOptions[option])); 
 			}		
-			
+			*/
+			for(option in queryOptions){
+			    queryString += '&'+option+'='+queryOptions[option];
+			}
 			new MCOR.Ajax.Request('api/get_list/'+this.dbTable+queryString, {
 				method:'get',
 				onComplete : function(resp){
