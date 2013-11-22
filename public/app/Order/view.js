@@ -2,15 +2,38 @@ POS.Order.View = new POS.View({
 	//Setup Stuff
 	name:'Order Views',
 	controller : POS.Order.Controller,
+
+    start : function(){
+        var content = $nE('div', {"class":"navbar"},
+        $nE('div', {"class":"navbar-inner"},
+        [
+		    $nE('button', {"id":"manageItems", "class":"btn btn-primary"},$cTN('Manage Menu')),
+		    $nE('button', {"id":"viewOrders", "class":"btn btn-primary"},$cTN('Orders View')),
+		    $nE('button', {"id":"takeOrdersViewButton", "class":"btn btn-primary"},$cTN('Take Orders View')),
+		    $nE('button', {"id":"kitchenViewButton", "class":"btn btn-primary"},$cTN('Kitchen View')),
+		    $nE('button', {"id":"registerViewButton", "class":"btn btn-primary"},$cTN('Register View'))
+	    ]))
+	    
+	    return content;
+    },
+	
+	back_button : function(){
+	    return $nE('div', 
+	        {"class":"navbar"},
+	        $nE('div', {"class":"navbar-inner"},
+	            $nE('button', {"id":"backButton", "class":"btn"},
+	                $cTN('Go Back')
+	           )
+	       )
+	   );
+	},
 	
 	/*
 	 * add Order 
 	 */
-	
+
 	add : function(){
 		var content = $nE('div', null, [
-		    $nE('button', {"id":"manageItems", "class":"btn btn-primary"},$cTN('Manage Menu')),
-		    $nE('button', {"id":"viewOrders", "class":"btn btn-primary"},$cTN('Orders View')),
 			$nE('div', {"id":"newOrder", "class":"span5"},[
 				$nE('input', {"id":"newOrderNumber", "type":"hidden","name":"order_number"}),
 				$nE('div', {"id":"newNameContainer"}, [
@@ -49,7 +72,7 @@ POS.Order.View = new POS.View({
 	},
 	
 	list: function(){
-	    var content = $nE('div',{}, [
+	    var content = $nE('div',{"id":"listAllOrdersTypes"}, [
 	        $nE('div', {"id":"pendingPanel", "class":"span4"}, [
 	            $nE('h3', {}, $cTN('Pending Orders')),
 	            $nE('ul', {"id":"pendingList", "class":"unstyled orderList"})
@@ -70,6 +93,32 @@ POS.Order.View = new POS.View({
 	    ]);
 	    
 	    return content;
+	},
+	
+	register_view : function(){
+	    var content = $nE('div',{'id':"registerView"},[
+	        $nE('div', {"id":"pendingPanel","class":"span12"}, [
+	            $nE('h3', {}, $cTN('Pending Orders')),
+	            $nE('ul', {"id":"pendingList", "class":"unstyled orderList"})
+	        ])
+	    ]);
+	   
+	   return content;
+	},
+	
+	kitchen_view : function(){
+	    var content = $nE('div',{"id":"kitchenView"},[
+	        $nE('div', {"id":"paidPanel", "class":"span5"}, [
+	            $nE('h3', {}, $cTN('Paid Orders')),
+	            $nE('ul', {"id":"paidList", "class":"unstyled orderList"})  
+	        ]),
+	         $nE('div', {"id":"startedPanel","class":"span5"}, [
+	            $nE('h3', {}, $cTN('Started Orders')),
+	            $nE('ul', {"id":"startedList", "class":"unstyled orderList"})  
+	        ]),
+	    ]);
+	   
+	   return content;
 	},
 	
 	_load_list_item : function(id){
@@ -95,7 +144,11 @@ POS.Order.View = new POS.View({
 	                $nE('h3')    
 	            ]),
 	            $nE('div', {"class":"modal-body", "id":"orderContent"},[
-	                
+	                $nE('ul', {"class":"unstyled"}),
+	                $nE('div', {"id":"totalsBox", "style":"border-top:1px dashed"}, [
+						$nE('div',{"class":"text-right", "id":"totalsTax"}),
+						$nE('div',{"class":"text-right", "id":"totalsGrandTotal", "style":"border-top:1px solid"})
+					])
 	            ]), 
 	            $nE('div',{"class":"modal-footer", "id":"orderFooter"},[
 	               $nE('button', {"class":"btn btn-large btn-primary"}),

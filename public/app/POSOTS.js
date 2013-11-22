@@ -23,8 +23,23 @@ var POS = {
 					soy: {
 						name:'soy',
 						label:'Soy',
-						suggested_price:0
+						suggested_price:0.50
 					},
+					tall: {
+					    name:'tall',
+					    label:'Tall',
+					    suggested_price:0
+					},
+					short: {
+					    name:'short',
+					    label:'Short',
+					    suggested_price:0
+					},
+					medium: {
+					    name:'medium',
+					    label:'Medium',
+					    suggested_price:0
+					}
 				}
 			},
 			taxes: {
@@ -33,7 +48,7 @@ var POS = {
 		};
 		
 		//This kicks it off
-		POS.Order.Controller.load_add();	
+		POS.Order.Controller.load_start();	
 	}			
 };
 

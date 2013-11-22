@@ -2,12 +2,43 @@ POS.Order.Controller = new POS.Controller({
 	name:'Order Controller',
 	model: MCOR.Models.Order,
 	
+	load_start : function(){
+	    document.body.innerHTML = '';
+	    this.load_view(this.view.start(),document.body);
+	    
+	    var manageItems = $g('manageItems');
+		manageItems.addEventListener('click', 
+		    POS.Item.Controller.load_list.bind(POS.Item.Controller));
+		
+		var takeOrders = $g('takeOrdersViewButton');
+		takeOrders.addEventListener('click', this.load_add.bind(this));
+		
+		var viewOrders = $g('viewOrders');
+		viewOrders.addEventListener('click', this.load_list.bind(this));
+		
+		var kitchenViewButton = $g('kitchenViewButton');
+		kitchenViewButton.addEventListener('click', 
+		    this.load_kitchen_view.bind(this));
+		
+		var registerViewButton = $g('registerViewButton');
+		registerViewButton.addEventListener('click', 
+		    this.load_register_view.bind(this));
+	},
+	
+	add_back_button : function(){
+	    this.load_view(this.view.back_button(),document.body);
+	    var backB = $g('backButton');
+	    backB.addEventListener('click', this.load_start.bind(this));
+	},
 /*
  * load_add
  */
 	load_add : function(){
 
 		document.body.innerHTML = '';
+		
+		this.add_back_button();
+		
 		this.orderDetails = {order_items:{}};
 		
 		this.load_view(this.view.add(),document.body);
@@ -37,6 +68,7 @@ POS.Order.Controller = new POS.Controller({
 		}.bind(this));
 		
 		this.reviewContent = $g('reviewView').innerHTML;
+		
 		//setinterval..yeah
 		var checkChanges = setInterval(function(){
 		    if(!$g('reviewView')){
@@ -51,25 +83,67 @@ POS.Order.Controller = new POS.Controller({
 		    }
 		}.bind(this), 200);
 		
-		var manageItems = $g('manageItems');
-		manageItems.addEventListener('click', POS.Item.Controller.load_list.bind(POS.Item.Controller));
-		
 		var submitButton = $g('submitOrder');
 		submitButton.addEventListener('click', this._submit_order.bind(this));		
-		
-		var viewOrders = $g('viewOrders');
-		viewOrders.addEventListener('click', this.load_list.bind(this));
 	},
 	
 	load_list : function(){
 	    document.body.innerHTML = '';
+	    this.add_back_button();
 	    this.load_view(this.view.list(),document.body);
 	    
-	    this.pending_list();
-	    this.paid_list();
-	    this.started_list();
-	    this.completed_list();
+	    //setinterval..yeah
+		var refreshList = setInterval(function(){
+		    
+		    if(!$g('listAllOrdersTypes')){
+		        clearInterval(refreshList);   
+		    } else {
+		        this.orders_list('pending');
+    	        this.orders_list('paid');
+	            this.orders_list('started');
+	            this.orders_list('completed');
+		    }
+		}.bind(this), 2000);
+
+	    this.orders_list('pending');
+	    this.orders_list('paid');
+	    this.orders_list('started');
+	    this.orders_list('completed');
+	},
+	
+	load_kitchen_view : function(){
+	    document.body.innerHTML = '';
+	    this.add_back_button();
+	    this.load_view(this.view.kitchen_view(),document.body);
 	    
+	    var refreshList = setInterval(function(){
+		    
+		    if(!$g('kitchenView')){
+		        clearInterval(refreshList);   
+		    } else {
+		        this.orders_list('paid');
+	            this.orders_list('started');
+		    }
+		}.bind(this), 2000);
+	    
+	    this.orders_list('paid');
+	    this.orders_list('started');
+	    
+	},
+	
+	load_register_view : function(){
+	    document.body.innerHTML = '';
+	    this.add_back_button();
+	    this.load_view(this.view.register_view(),document.body);
+	    var refreshList = setInterval(function(){
+		    
+		    if(!$g('registerView')){
+		        clearInterval(refreshList);   
+		    } else {
+		        this.orders_list('pending');
+		    }
+		}.bind(this), 2000);
+	    this.orders_list('pending');
 	},
 	
 	_put_into_list : function(content, container){
@@ -89,34 +163,17 @@ POS.Order.Controller = new POS.Controller({
 	        target = e.target.parentNode;
 	    }
 	    
-	    var data = target.data;
-	    console.log(data);
         var id = target.id.replace('order_','');
         
         var modal = this.view._launch_item_modal();
+        modal.data =target.data;
         
-        modal.childNodes[0].childNodes[0].innerHTML = data.order.order_number+' - '+data.order.name;
-        modal.childNodes[1].innerHTML = 'Order Details';
-       
-        modal.data = data;
-        var btnLabel = 'Paid';
-        var newStatus = 'paid';
-        if(data.order.status === 'paid'){
-            newStatus = 'started';
-            btnLabel = 'Started'
-        } else if(data.order.status === 'started'){
-            newStatus = 'complete',
-            btnLabel = 'Complete'
-        } else if(data.order.status === 'complete'){
-           modal.childNodes[2].childNodes[0].style.visibility = 'hidden'; 
-        }
-        modal.childNodes[2].childNodes[0].id = newStatus;
-        modal.childNodes[2].childNodes[0].innerHTML = btnLabel;
-        
-        modal.childNodes[2].childNodes[0].addEventListener('click', function(e){
-            console.log(e);
-            this.change_status_of_item(e.target.id);
-        }.bind(this));
+        //This just makes a header
+        modal.childNodes[0].childNodes[0].innerHTML = 
+            modal.data.order.order_number+' - '+modal.data.order.name;
+
+        this._add_order_data_for_modal(modal);
+        this._add_buttons_for_modal(modal);
         
         modal.childNodes[2].childNodes[1].addEventListener('click',function(){
              $('#orderModal').modal('hide'); 
@@ -130,6 +187,68 @@ POS.Order.Controller = new POS.Controller({
             elem.parentNode.removeChild(elem); 
          });
 	},
+    
+    _add_order_data_for_modal : function(modal){
+        var modalBody = modal.childNodes[1];
+        console.log(modal.data);
+        var elemsList = [];  
+    
+        modalBody.childNodes[1].childNodes[0].innerHTML = 
+            'Tax: $'+modal.data.order.salestax;
+            
+        modalBody.childNodes[1].childNodes[1].innerHTML = 
+            'Total: $'+modal.data.order.grandtotal;
+        
+        for(var id in modal.data.order.order_items){
+            var elem = this.view._review_item(id);
+            var order = modal.data.order.order_items[id];
+            elem.childNodes[0].childNodes[0].childNodes[0].innerHTML = 
+                order.item_name;
+            
+            elem.childNodes[0].childNodes[0].childNodes[1].innerHTML =
+                order.item_price;
+            
+            //TODO do something with every item
+            
+            var modifersUl = elem.childNodes[0].childNodes[1];
+            console.log(modifersUl);
+            
+            for(var optName in order.modifiers){
+                var option = order.modifiers[optName];
+                var optElem = this.view._review_item_option(id+'_'+optName);
+                
+                optElem.childNodes[0].innerHTML = option.modifier_label;
+                optElem.childNodes[1].innerHTML = option.modifier_price;
+                $aC(modifersUl,[optElem]);
+            }
+            
+            elemsList.push(elem);
+        }
+        
+        $aC(modalBody.childNodes[0],elemsList);
+        //modal.childNodes[1].innerHTML = 'Order Details';
+    },
+    
+	_add_buttons_for_modal : function(modal){
+	    var btnLabel = 'Paid';
+        var newStatus = 'paid';
+        if(modal.data.order.status === 'paid'){
+            newStatus = 'started';
+            btnLabel = 'Started'
+        } else if(modal.data.order.status === 'started'){
+            newStatus = 'complete',
+            btnLabel = 'Complete'
+        } else if(modal.data.order.status === 'complete'){
+           modal.childNodes[2].childNodes[0].style.visibility = 'hidden'; 
+        }
+        modal.childNodes[2].childNodes[0].id = newStatus;
+        modal.childNodes[2].childNodes[0].innerHTML = btnLabel;
+        
+        modal.childNodes[2].childNodes[0].addEventListener('click', function(e){
+            console.log(e);
+            this.change_status_of_item(e.target.id);
+        }.bind(this));  
+	},
 	
 	change_status_of_item : function(newStatus){
 	    console.log('The Status is about to be changed to '+newStatus+'!');
@@ -140,49 +259,23 @@ POS.Order.Controller = new POS.Controller({
 	    this.update_item(modal.data._id, modal.data, function(d){
 	        console.log(d);
 	    });
-	    //save to database
-	    
 	    //TODO if time // Send to socket IO for updating
 	    
 	    //close the modal
 	    $('#orderModal').modal('hide');
 	},
 	
-	pending_list: function(){
+	orders_list : function(listName){
 	    this.get_all(function(data){
-	        var pendingList = $g('pendingList');
+	        var theList = $g(listName+'List');
+    	    $g(listName+'List').innerHTML = '';
 	        data.forEach(function(item){
-	            this._put_into_list(item.content, pendingList);
+	            this._put_into_list(item.content, theList);
 	        }.bind(this));
-	    }.bind(this), {view:'get_all_pending'});
+	    }.bind(this), {view:'get_all_'+listName}); 
 	},
 	
-	paid_list : function(){
-	   this.get_all(function(data){
-	        var paidList = $g('paidList');
-	        data.forEach(function(item){
-	            this._put_into_list(item.content, paidList)
-	        }.bind(this));
-	    }.bind(this),{view:'get_all_paid'}); 
-	},
-    
-    started_list : function(){
-        this.get_all(function(data){
-	        var startedList = $g('startedList');
-	        data.forEach(function(item){
-	            this._put_into_list(item.content, startedList)
-	        }.bind(this));
-	    }.bind(this),{view:'get_all_started'});
-    },
-    
-    completed_list : function(){
-        this.get_all(function(data){
-	        var completedList = $g('completedList');
-	        data.forEach(function(item){
-	            this._put_into_list(item.content, completedList)
-	        }.bind(this));
-	    }.bind(this),{view:'get_all_completed'});
-    },
+	
 	_submit_order : function(){
 		//TODO get all of the values for each item on the left side. to make the order and put it into a JSON array.
 		this.orderDetails.status = 'pending';
