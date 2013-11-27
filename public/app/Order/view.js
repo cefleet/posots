@@ -146,13 +146,15 @@ POS.Order.View = new POS.View({
 	            $nE('div', {"class":"modal-body", "id":"orderContent"},[
 	                $nE('ul', {"class":"unstyled"}),
 	                $nE('div', {"id":"totalsBox", "style":"border-top:1px dashed"}, [
+	                    $nE('div',{"class":"text-right", "id":"totalsTotal"}),
 						$nE('div',{"class":"text-right", "id":"totalsTax"}),
 						$nE('div',{"class":"text-right", "id":"totalsGrandTotal", "style":"border-top:1px solid"})
 					])
 	            ]), 
 	            $nE('div',{"class":"modal-footer", "id":"orderFooter"},[
 	               $nE('button', {"class":"btn btn-large btn-primary"}),
-	               $nE('button', {"class":"btn","id":"closeModal"}, $cTN('Close'))
+	               $nE('button', {"class":"btn","id":"closeModal"}, $cTN('Close')),
+   	               $nE('button', {"class":"btn btn-danger","id":"voidItem"}, $cTN('Void'))
 	            ])
 	        ])
 	   return content;

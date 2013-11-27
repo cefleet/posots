@@ -121,8 +121,8 @@ POS.Order.Controller = new POS.Controller({
 		    if(!$g('kitchenView')){
 		        clearInterval(refreshList);   
 		    } else {
-		        this.orders_list('paid');
-	            this.orders_list('started');
+		        this.orders_list('paid',true);
+	            this.orders_list('started',true);
 		    }
 		}.bind(this), 2000);
 	    
@@ -194,10 +194,13 @@ POS.Order.Controller = new POS.Controller({
         var elemsList = [];  
     
         modalBody.childNodes[1].childNodes[0].innerHTML = 
-            'Tax: $'+modal.data.order.salestax;
+            'Sub Total: $'+modal.data.order.subtotal;
             
         modalBody.childNodes[1].childNodes[1].innerHTML = 
-            'Total: $'+modal.data.order.grandtotal;
+            'Tax: $'+modal.data.order.salestax;
+            
+        modalBody.childNodes[1].childNodes[2].innerHTML = 
+            'Grand Total: $'+modal.data.order.grandtotal;
         
         for(var id in modal.data.order.order_items){
             var elem = this.view._review_item(id);
@@ -232,22 +235,36 @@ POS.Order.Controller = new POS.Controller({
 	_add_buttons_for_modal : function(modal){
 	    var btnLabel = 'Paid';
         var newStatus = 'paid';
+        var canVoid = true;
         if(modal.data.order.status === 'paid'){
             newStatus = 'started';
-            btnLabel = 'Started'
+            btnLabel = 'Started';
+            canVoid = false;
         } else if(modal.data.order.status === 'started'){
-            newStatus = 'complete',
-            btnLabel = 'Complete'
+            newStatus = 'complete';
+            btnLabel = 'Complete';
+            canVoid = false;
         } else if(modal.data.order.status === 'complete'){
            modal.childNodes[2].childNodes[0].style.visibility = 'hidden'; 
+           canVoid = false;
         }
+        
         modal.childNodes[2].childNodes[0].id = newStatus;
         modal.childNodes[2].childNodes[0].innerHTML = btnLabel;
         
         modal.childNodes[2].childNodes[0].addEventListener('click', function(e){
             console.log(e);
             this.change_status_of_item(e.target.id);
-        }.bind(this));  
+        }.bind(this));
+        
+        if(canVoid){
+            modal.childNodes[2].childNodes[2].addEventListener('click', function(e){
+                console.log(e);
+                this.change_status_of_item('void');
+            }.bind(this));
+        } else {
+            modal.childNodes[2].childNodes[2].style.display = 'none';
+        }
 	},
 	
 	change_status_of_item : function(newStatus){
@@ -265,10 +282,13 @@ POS.Order.Controller = new POS.Controller({
 	    $('#orderModal').modal('hide');
 	},
 	
-	orders_list : function(listName){
+	orders_list : function(listName,reverse){
 	    this.get_all(function(data){
 	        var theList = $g(listName+'List');
     	    $g(listName+'List').innerHTML = '';
+    	    if(reverse){
+    	        data = data.reverse();
+    	    }
 	        data.forEach(function(item){
 	            this._put_into_list(item.content, theList);
 	        }.bind(this));
