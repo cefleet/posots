@@ -285,9 +285,13 @@ POS.Order.Controller = new POS.Controller({
 	orders_list : function(listName,reverse){
 	    this.get_all(function(data){
 	        var theList = $g(listName+'List');
-    	    $g(listName+'List').innerHTML = '';
+    	    	$g(listName+'List').innerHTML = '';
+		 data.sort(function(a, b){
+                   return a.content.order.order_number-b.content.order.order_number
+                })
+
     	    if(reverse){
-    	        data = data.reverse();
+    	    	//data = data.reverse();
     	    }
 	        data.forEach(function(item){
 	            this._put_into_list(item.content, theList);
